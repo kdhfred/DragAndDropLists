@@ -46,7 +46,8 @@ typedef OnItemAdd = void Function(
   int listIndex,
   int newItemIndex,
 );
-typedef OnListAdd = void Function(DragAndDropListInterface newList, int newListIndex);
+typedef OnListAdd = void Function(
+    DragAndDropListInterface newList, int newListIndex);
 typedef OnListReorder = void Function(int oldListIndex, int newListIndex);
 typedef OnListDraggingChanged = void Function(
   DragAndDropListInterface? list,
@@ -279,12 +280,15 @@ class DragAndDropLists extends StatefulWidget {
   /// the vertical axis. By default this is set to true. This may be useful to
   /// disable when setting customDragTargets
   final bool constrainDraggingAxis;
-  
+
   /// If you put a widget before DragAndDropLists there's an unexpected padding
   /// before the list renders. This is the default behaviour for ListView which
   /// is used internally. To remove the padding, set this field to true
   /// https://github.com/flutter/flutter/issues/14842#issuecomment-371344881
   final bool removeTopPadding;
+
+  /// The size of the scroll area at the edges of the list for auto-scrolling
+  final double scrollAreaSize;
 
   DragAndDropLists({
     required this.children,
@@ -336,12 +340,11 @@ class DragAndDropLists extends StatefulWidget {
     this.itemDragHandle,
     this.constrainDraggingAxis = true,
     this.removeTopPadding = false,
+    this.scrollAreaSize = 20,
     super.key,
   }) {
     if (listGhost == null &&
-        children
-            .whereType<DragAndDropListExpansionInterface>()
-            .isNotEmpty) {
+        children.whereType<DragAndDropListExpansionInterface>().isNotEmpty) {
       throw Exception(
           'If using DragAndDropListExpansion, you must provide a non-null listGhost');
     }
@@ -700,10 +703,11 @@ class DragAndDropListsState extends State<DragAndDropLists> {
   }
 
   final int _duration = 30; // in ms
-  final int _scrollAreaSize = 20;
-  final double _overDragMin = 5.0;
-  final double _overDragMax = 20.0;
-  final double _overDragCoefficient = 3.3;
+
+  // Dynamic getters based on scrollAreaSize
+  double get _overDragMin => widget.scrollAreaSize * 0.25;
+  double get _overDragMax => widget.scrollAreaSize;
+  double get _overDragCoefficient => widget.scrollAreaSize / 6.0;
 
   _scrollList() async {
     if (!widget.disableScrolling &&
@@ -755,18 +759,18 @@ class DragAndDropListsState extends State<DragAndDropLists> {
     var pointerYPosition = _pointerYPosition;
     var scrollController = _scrollController;
     if (scrollController != null && pointerYPosition != null) {
-      if (pointerYPosition < (top + _scrollAreaSize) &&
+      if (pointerYPosition < (top + widget.scrollAreaSize) &&
           scrollController.position.pixels >
               scrollController.position.minScrollExtent) {
         final overDrag =
-            max((top + _scrollAreaSize) - pointerYPosition, _overDragMax);
+            max((top + widget.scrollAreaSize) - pointerYPosition, _overDragMax);
         newOffset = max(scrollController.position.minScrollExtent,
             scrollController.position.pixels - overDrag / _overDragCoefficient);
-      } else if (pointerYPosition > (bottom - _scrollAreaSize) &&
+      } else if (pointerYPosition > (bottom - widget.scrollAreaSize) &&
           scrollController.position.pixels <
               scrollController.position.maxScrollExtent) {
         final overDrag = max<double>(
-            pointerYPosition - (bottom - _scrollAreaSize), _overDragMax);
+            pointerYPosition - (bottom - widget.scrollAreaSize), _overDragMax);
         newOffset = min(scrollController.position.maxScrollExtent,
             scrollController.position.pixels + overDrag / _overDragCoefficient);
       }
@@ -784,21 +788,21 @@ class DragAndDropListsState extends State<DragAndDropLists> {
     var pointerXPosition = _pointerXPosition;
     var scrollController = _scrollController;
     if (scrollController != null && pointerXPosition != null) {
-      if (pointerXPosition < (left + _scrollAreaSize) &&
+      if (pointerXPosition < (left + widget.scrollAreaSize) &&
           scrollController.position.pixels >
               scrollController.position.minScrollExtent) {
         // scrolling toward minScrollExtent
         final overDrag = min(
-            (left + _scrollAreaSize) - pointerXPosition + _overDragMin,
+            (left + widget.scrollAreaSize) - pointerXPosition + _overDragMin,
             _overDragMax);
         newOffset = max(scrollController.position.minScrollExtent,
             scrollController.position.pixels - overDrag / _overDragCoefficient);
-      } else if (pointerXPosition > (right - _scrollAreaSize) &&
+      } else if (pointerXPosition > (right - widget.scrollAreaSize) &&
           scrollController.position.pixels <
               scrollController.position.maxScrollExtent) {
         // scrolling toward maxScrollExtent
         final overDrag = min(
-            pointerXPosition - (right - _scrollAreaSize) + _overDragMin,
+            pointerXPosition - (right - widget.scrollAreaSize) + _overDragMin,
             _overDragMax);
         newOffset = min(scrollController.position.maxScrollExtent,
             scrollController.position.pixels + overDrag / _overDragCoefficient);
@@ -817,21 +821,21 @@ class DragAndDropListsState extends State<DragAndDropLists> {
     var pointerXPosition = _pointerXPosition;
     var scrollController = _scrollController;
     if (scrollController != null && pointerXPosition != null) {
-      if (pointerXPosition < (left + _scrollAreaSize) &&
+      if (pointerXPosition < (left + widget.scrollAreaSize) &&
           scrollController.position.pixels <
               scrollController.position.maxScrollExtent) {
         // scrolling toward maxScrollExtent
         final overDrag = min(
-            (left + _scrollAreaSize) - pointerXPosition + _overDragMin,
+            (left + widget.scrollAreaSize) - pointerXPosition + _overDragMin,
             _overDragMax);
         newOffset = min(scrollController.position.maxScrollExtent,
             scrollController.position.pixels + overDrag / _overDragCoefficient);
-      } else if (pointerXPosition > (right - _scrollAreaSize) &&
+      } else if (pointerXPosition > (right - widget.scrollAreaSize) &&
           scrollController.position.pixels >
               scrollController.position.minScrollExtent) {
         // scrolling toward minScrollExtent
         final overDrag = min(
-            pointerXPosition - (right - _scrollAreaSize) + _overDragMin,
+            pointerXPosition - (right - widget.scrollAreaSize) + _overDragMin,
             _overDragMax);
         newOffset = max(scrollController.position.minScrollExtent,
             scrollController.position.pixels - overDrag / _overDragCoefficient);
