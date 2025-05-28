@@ -290,6 +290,10 @@ class DragAndDropLists extends StatefulWidget {
   /// The size of the scroll area at the edges of the list for auto-scrolling
   final double scrollAreaSize;
 
+  /// Controls the auto-scrolling speed during drag operations.
+  /// Higher values = faster scrolling. Default is 1.0.
+  final double scrollSpeed;
+
   DragAndDropLists({
     required this.children,
     required this.onItemReorder,
@@ -341,6 +345,7 @@ class DragAndDropLists extends StatefulWidget {
     this.constrainDraggingAxis = true,
     this.removeTopPadding = false,
     this.scrollAreaSize = 20,
+    this.scrollSpeed = 1.0,
     super.key,
   }) {
     if (listGhost == null &&
@@ -702,12 +707,12 @@ class DragAndDropListsState extends State<DragAndDropLists> {
     _pointerDown = false;
   }
 
-  final int _duration = 30; // in ms
-
-  // Dynamic getters based on scrollAreaSize
+  // Dynamic getters based on scrollAreaSize and scrollSpeed
+  int get _duration => (30 / widget.scrollSpeed).round().clamp(10, 100);
   double get _overDragMin => widget.scrollAreaSize * 0.25;
   double get _overDragMax => widget.scrollAreaSize;
-  double get _overDragCoefficient => widget.scrollAreaSize / 6.0;
+  double get _overDragCoefficient =>
+      (widget.scrollAreaSize / 6.0) / widget.scrollSpeed;
 
   _scrollList() async {
     if (!widget.disableScrolling &&
