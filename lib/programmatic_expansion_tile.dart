@@ -248,7 +248,9 @@ class ProgrammaticExpansionTileState extends State<ProgrammaticExpansionTile>
     return AnimatedBuilder(
       animation: _controller.view,
       builder: _buildChildren,
-      child: closed ? null : Column(children: widget.children as List<Widget>),
+      child: closed
+          ? null
+          : Column(children: widget.children.whereType<Widget>().toList()),
     );
   }
 }

@@ -199,6 +199,7 @@ class _DragAndDropItemWrapper extends State<DragAndDropItemWrapper>
                   : Container(),
             ),
             Listener(
+              behavior: HitTestBehavior.opaque,
               onPointerMove: _onPointerMove,
               onPointerDown: widget.parameters!.onPointerDown,
               onPointerUp: widget.parameters!.onPointerUp,
