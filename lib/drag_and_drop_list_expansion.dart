@@ -30,6 +30,13 @@ class DragAndDropListExpansion implements DragAndDropListExpansionInterface {
   final Widget? contentsWhenEmpty;
   final Widget? lastTarget;
 
+  /// header 제외 영역에 적용되는 inner decoration.
+  final Decoration? innerDecoration;
+  /// header 제외 영역에 적용되는 inner padding.
+  final EdgeInsetsGeometry? innerPadding;
+  /// header 제외 영역에 적용되는 dragging 중 inner decoration.
+  final Decoration? innerDecorationWhileDragging;
+
   /// Whether or not this item can be dragged.
   /// Set to true if it can be reordered.
   /// Set to false if it must remain fixed.
@@ -61,6 +68,11 @@ class DragAndDropListExpansion implements DragAndDropListExpansionInterface {
     this.canDrag = true,
     this.key,
     this.disableTopAndBottomBorders = false,
+
+    /// header 제외 영역에 적용되는 inner decoration/padding.
+    this.innerDecoration,
+    this.innerPadding,
+    this.innerDecorationWhileDragging,
   }) {
     _expanded.value = initiallyExpanded;
   }
@@ -68,6 +80,19 @@ class DragAndDropListExpansion implements DragAndDropListExpansionInterface {
   @override
   Widget generateWidget(DragAndDropBuilderParameters params) {
     var contents = _generateDragAndDropListInnerContents(params);
+    Widget contentsWidget = Column(
+      children: contents,
+    );
+
+    final Decoration? innerDecorationToApply =
+        innerDecoration ?? params.listInnerDecoration;
+    if (innerDecorationToApply != null || innerPadding != null) {
+      contentsWidget = Container(
+        padding: innerPadding,
+        decoration: innerDecorationToApply,
+        child: contentsWidget,
+      );
+    }
 
     Widget expandable = ProgrammaticExpansionTile(
       title: title,
@@ -80,7 +105,7 @@ class DragAndDropListExpansion implements DragAndDropListExpansionInterface {
       initiallyExpanded: initiallyExpanded,
       onExpansionChanged: _onSetExpansion,
       key: _expansionKey,
-      children: contents,
+      children: [contentsWidget],
     );
 
     if (params.listDecoration != null) {
