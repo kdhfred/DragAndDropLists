@@ -5,8 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
-const Duration _kExpand = Duration(milliseconds: 200);
-
 /// A single-line [ListTile] with a trailing button that expands or collapses
 /// the tile to reveal or hide the [children].
 ///
@@ -23,6 +21,8 @@ const Duration _kExpand = Duration(milliseconds: 200);
 ///  * The "Expand/collapse" section of
 ///    <https://material.io/guidelines/components/lists-controls.html>.
 class ProgrammaticExpansionTile extends StatefulWidget {
+  static const Duration defaultExpansionDuration = Duration(milliseconds: 200);
+
   /// Creates a single-line [ListTile] with a trailing button that expands or collapses
   /// the tile to reveal or hide the [children]. The [initiallyExpanded] property must
   /// be non-null.
@@ -38,6 +38,7 @@ class ProgrammaticExpansionTile extends StatefulWidget {
     this.children = const <Widget>[],
     this.trailing,
     this.initiallyExpanded = false,
+    this.expansionDuration = defaultExpansionDuration,
     this.disableTopAndBottomBorders = false,
   }) : super(key: key);
 
@@ -84,6 +85,9 @@ class ProgrammaticExpansionTile extends StatefulWidget {
   /// Specifies if the list tile is initially expanded (true) or collapsed (false, the default).
   final bool initiallyExpanded;
 
+  /// The duration of the expand and collapse height animation.
+  final Duration expansionDuration;
+
   /// Disable to borders displayed at the top and bottom when expanded
   final bool disableTopAndBottomBorders;
 
@@ -119,7 +123,10 @@ class ProgrammaticExpansionTileState extends State<ProgrammaticExpansionTile>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(duration: _kExpand, vsync: this);
+    _controller = AnimationController(
+      duration: widget.expansionDuration,
+      vsync: this,
+    );
     _heightFactor = _controller.drive(_easeInTween);
     _iconTurns = _controller.drive(_halfTween.chain(_easeInTween));
     _borderColor = _controller.drive(_borderColorTween.chain(_easeOutTween));
@@ -141,6 +148,14 @@ class ProgrammaticExpansionTileState extends State<ProgrammaticExpansionTile>
         widget.onExpansionChanged!(_isExpanded);
       }
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant ProgrammaticExpansionTile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.expansionDuration != widget.expansionDuration) {
+      _controller.duration = widget.expansionDuration;
+    }
   }
 
   @override

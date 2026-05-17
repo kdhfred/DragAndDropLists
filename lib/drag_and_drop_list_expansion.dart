@@ -17,6 +17,7 @@ class DragAndDropListExpansion implements DragAndDropListExpansionInterface {
   final Widget? trailing;
   final Widget? leading;
   final bool initiallyExpanded;
+  final Duration expansionDuration;
 
   /// Set this to a unique key that will remain unchanged over the lifetime of the list.
   /// Used to maintain the expanded/collapsed states
@@ -60,6 +61,7 @@ class DragAndDropListExpansion implements DragAndDropListExpansionInterface {
     this.trailing,
     this.leading,
     this.initiallyExpanded = false,
+    this.expansionDuration = ProgrammaticExpansionTile.defaultExpansionDuration,
     this.backgroundColor,
     this.onExpansionChanged,
     this.contentsWhenEmpty,
@@ -103,6 +105,7 @@ class DragAndDropListExpansion implements DragAndDropListExpansionInterface {
       disableTopAndBottomBorders: disableTopAndBottomBorders,
       backgroundColor: backgroundColor,
       initiallyExpanded: initiallyExpanded,
+      expansionDuration: expansionDuration,
       onExpansionChanged: _onSetExpansion,
       key: _expansionKey,
       children: [contentsWidget],
